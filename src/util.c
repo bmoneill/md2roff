@@ -1,7 +1,7 @@
 #include "util.h"
 
 #include <stddef.h>
-#include <stdlib.h>>
+#include <stdlib.h>
 #include <string.h>
 
 FILE *open_file(const char *path, const char *flags) {
