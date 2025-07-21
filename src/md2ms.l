@@ -13,6 +13,7 @@ void do_surround(char *, int);
 FILE *open_file(const char *, const char *);
 int parse_args(int, char **);
 void print_head(void);
+void surround_multiline(const char *, char *, int);
 
 void usage(char *argv0);
 
