@@ -33,7 +33,7 @@ void surround_multiline(const char *, char *, int);
 
 void usage(char *argv0);
 
-typedef struct md2roff_args_s {
+typedef struct {
 	FILE *input;
 	FILE *output;
 	char *title;
