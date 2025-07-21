@@ -28,7 +28,8 @@ enum {
 	SUR_B,
 	SUR_I,
 	SUR_UL,
-	SUR_M
+	SUR_M,
+	SUR_MULTILINE_M,
 };
 
 typedef struct md2roff_args_s {
@@ -58,6 +59,7 @@ STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 "*"{STRING}+"*" do_surround(yytext, SUR_I);
 "__"{STRING}+"__" do_surround(yytext, SUR_UL);
 "`"{STRING}+"`" do_surround(yytext, SUR_M);
+"```"{STRING}+"\n"+{STRING}+"\n```" do_surround(yytext, SUR_MULTILINE_M);
 "\n\n" fprintf(args.output, "\n.PP\n");
 %%
 
@@ -80,9 +82,19 @@ void do_surround(char *text, int type) {
 		case SUR_I: fprintf(args.output, "\\fI%s\\fR", strip_surround(text, 1)); break;
 		case SUR_UL: fprintf(args.output, ".UL\n%s\n.R", strip_surround(text, 2)); break;
 		case SUR_M: fprintf(args.output, "\n.ft 8\n%s\n.R", strip_surround(text, 1)); break;
+        case SUR_MULTILINE_M: surround_multiline(".IP\n.DS L\n.ft C\n%s\n.ft\n", text, 3); break;
 	}
 	fprintf(args.output, "\n");
 }
+
+void surround_multiline(const char *fmt, char *text, int count) {
+    for (int i = count; i < strlen(text) - count; i++) {
+        if (text[i] == '\n') {
+            fprintf(args.output, fmt, strip_surround(text, count));
+        }
+    }
+}
+
 
 int parse_args(int argc, char **argv) {
 	int opt;
