@@ -49,6 +49,7 @@ md2roff_args_t args;
 STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 
 %%
+"```"{STRING}+"\n"{STRING}+"\n```" do_surround(yytext, SUR_MULTILINE_M);
 "# "{STRING}+"\n" do_pre(yytext, PRE_SH1);
 "## "{STRING}+"\n" do_pre(yytext, PRE_SH2);
 "### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
@@ -60,7 +61,6 @@ STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 "*"{STRING}+"*" do_surround(yytext, SUR_I);
 "__"{STRING}+"__" do_surround(yytext, SUR_UL);
 "`"{STRING}+"`" do_surround(yytext, SUR_M);
-"```"{STRING}+"\n"+{STRING}+"\n```" do_surround(yytext, SUR_MULTILINE_M);
 "\n\n" fprintf(args.output, "\n.PP\n");
 %%
 
@@ -91,7 +91,7 @@ void do_surround(char *text, MSTag type) {
 void surround_multiline(const char *fmt, char *text, int count) {
     for (int i = count; i < strlen(text) - count; i++) {
         if (text[i] == '\n') {
-            fprintf(args.output, fmt, strip_surround(text, count));
+            fprintf(args.output, fmt, strip_surround(&text[i+1], count));
         }
     }
 }
