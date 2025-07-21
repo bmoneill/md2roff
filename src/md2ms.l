@@ -8,16 +8,7 @@
 #define FLAG_BREAK_FRONT_PAGE 0x2
 #define FLAG_NO_DATE_DISPLAY 0x4
 
-void do_pre(char *, int);
-void do_surround(char *, int);
-FILE *open_file(const char *, const char *);
-int parse_args(int, char **);
-void print_head(void);
-void surround_multiline(const char *, char *, int);
-
-void usage(char *argv0);
-
-enum {
+typedef enum {
 	PRE_TL,
 	PRE_SH1,
 	PRE_SH2,
@@ -31,7 +22,16 @@ enum {
 	SUR_UL,
 	SUR_M,
 	SUR_MULTILINE_M,
-};
+} MSTag;
+
+void do_pre(char *, MSTag);
+void do_surround(char *, MSTag);
+FILE *open_file(const char *, const char *);
+int parse_args(int, char **);
+void print_head(void);
+void surround_multiline(const char *, char *, int);
+
+void usage(char *argv0);
 
 typedef struct md2roff_args_s {
 	FILE *input;
@@ -64,7 +64,7 @@ STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 "\n\n" fprintf(args.output, "\n.PP\n");
 %%
 
-void do_pre(char *text, int type) {
+void do_pre(char *text, MSTag type) {
 	switch (type) {
 		case PRE_SH1: fprintf(args.output, ".NH 1\n%s\n.PP", strip_whitespace(&text[2])); break;
 		case PRE_SH2: fprintf(args.output, ".NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
@@ -76,7 +76,7 @@ void do_pre(char *text, int type) {
 	fprintf(args.output, "\n");
 }
 
-void do_surround(char *text, int type) {
+void do_surround(char *text, MSTag type) {
 	switch (type) {
 		case SUR_BI: fprintf(args.output, "\\fB\\fI%s\\fR", strip_surround(text, 3)); break;
 		case SUR_B: fprintf(args.output, "\\fB%s\\fR", strip_surround(text, 2)); break;
