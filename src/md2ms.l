@@ -46,7 +46,7 @@ md2roff_args_t args;
 %option noyywrap
 %option yylineno
 %option no
-STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
+STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 
 %%
 "```"{STRING}+"\n"{STRING}+"\n```" do_surround(yytext, SUR_MULTILINE_M);
@@ -55,7 +55,8 @@ STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 "### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
 "#### "{STRING}+"\n" do_pre(yytext, PRE_SH4);
 "##### "{STRING}+"\n" do_pre(yytext, PRE_SH5);
-"\n* " do_pre(yytext, PRE_IP);
+"\n* "{STRING}+"\n" do_pre(yytext, PRE_IP);
+"\n- "{STRING}+"\n" do_pre(yytext, PRE_IP);
 "***"{STRING}+"***" do_surround(yytext, SUR_BI);
 "**"{STRING}+"**" do_surround(yytext, SUR_B);
 "*"{STRING}+"*" do_surround(yytext, SUR_I);
@@ -65,13 +66,14 @@ STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\' \t]
 %%
 
 void do_pre(char *text, MSTag type) {
+	fprintf(args.output, "\n");
 	switch (type) {
 		case PRE_SH1: fprintf(args.output, ".NH 1\n%s\n.PP", strip_whitespace(&text[2])); break;
 		case PRE_SH2: fprintf(args.output, ".NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
 		case PRE_SH3: fprintf(args.output, ".NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
 		case PRE_SH4: fprintf(args.output, ".NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
 		case PRE_SH5: fprintf(args.output, ".NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
-		case PRE_IP:  fprintf(args.output, ".IP - \n"); break;
+		case PRE_IP:  fprintf(args.output, ".IP - \n%s", strip_whitespace(&text[2])); break;
 	}
 	fprintf(args.output, "\n");
 }
@@ -82,7 +84,7 @@ void do_surround(char *text, MSTag type) {
 		case SUR_B: fprintf(args.output, "\\fB%s\\fR", strip_surround(text, 2)); break;
 		case SUR_I: fprintf(args.output, "\\fI%s\\fR", strip_surround(text, 1)); break;
 		case SUR_UL: fprintf(args.output, ".UL\n%s\n.R", strip_surround(text, 2)); break;
-		case SUR_M: fprintf(args.output, "\n.ft 8\n%s\n.R", strip_surround(text, 1)); break;
+		case SUR_M: fprintf(args.output, "\\fC%s\\fR", strip_surround(text, 1)); break;
         case SUR_MULTILINE_M: surround_multiline(".IP\n.DS L\n.ft C\n%s\n.ft\n", text, 3); break;
 	}
 	fprintf(args.output, "\n");
