@@ -84,7 +84,7 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
         }
     }
 }
-"["{STRING}+"]("{STRING}+")" { do_link(yytext); }
+"["{STRING}+"]("{STRING}+")"{STRING} { do_link(yytext); }
 "# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
 "## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
 "### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
