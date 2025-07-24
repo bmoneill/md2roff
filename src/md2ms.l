@@ -24,6 +24,7 @@ typedef enum {
 	SUR_MULTILINE_M,
 } MSTag;
 
+void do_link(char *);
 void do_pre(char *, MSTag);
 void do_surround(char *, MSTag);
 FILE *open_file(const char *, const char *);
@@ -41,29 +42,78 @@ typedef struct {
 	uint8_t flags;
 } md2roff_args_t;
 md2roff_args_t args;
+
+char codeblock_buf[65536];
+size_t codeblock_len = 0;
+int in_codeblock = 0;
 %}
 
 %option noyywrap
 %option yylineno
 %option no
-STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\'* \t]
-
+STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
+%x CODEBLOCK
 %%
-"```"{STRING}+"\n"{STRING}+"\n```\n" do_surround(yytext, SUR_MULTILINE_M);
+"```"[^\n]*\n    {
+    if (!in_codeblock) {
+        codeblock_len = 0;
+        in_codeblock = 1;
+        codeblock_buf[0] = '\0';
+        BEGIN(CODEBLOCK);
+    }
+}
+
+<CODEBLOCK>{
+    "```"[^\n]*\n   {
+        // End of code block
+        BEGIN(INITIAL);
+        codeblock_buf[codeblock_len] = '\0';
+        fprintf(args.output, ".IP\n.DS L\n.ft C\n%s\n.ft\n", codeblock_buf);
+        in_codeblock = 0;
+    }
+    ^([^\n]*\n) {
+        // Buffer any line except the closing delimiter
+        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
+            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
+            codeblock_len += yyleng;
+        }
+    }
+    . {
+        // Catch any remaining characters (shouldn't happen, but prevents infinite loops)
+        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
+            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
+            codeblock_len += yyleng;
+        }
+    }
+}
+"["{STRING}+"]("{STRING}+")" { do_link(yytext); }
 "# "{STRING}+"\n" do_pre(yytext, PRE_SH1);
 "## "{STRING}+"\n" do_pre(yytext, PRE_SH2);
 "### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
 "#### "{STRING}+"\n" do_pre(yytext, PRE_SH4);
 "##### "{STRING}+"\n" do_pre(yytext, PRE_SH5);
-"\n* "{STRING}+"\n" do_pre(yytext, PRE_IP);
+"\n* " do_pre(yytext, PRE_IP);
 "\n- "{STRING}+"\n" do_pre(yytext, PRE_IP);
 "***"{STRING}+"***" do_surround(yytext, SUR_BI);
 "**"{STRING}+"**" do_surround(yytext, SUR_B);
 "*"{STRING}+"*" do_surround(yytext, SUR_I);
 "__"{STRING}+"__" do_surround(yytext, SUR_UL);
 "`"{STRING}+"`" do_surround(yytext, SUR_M);
-"\n\n" fprintf(args.output, "\n.PP\n");
+"\n\n" { fprintf(args.output, "\n.PP\n"); }
 %%
+
+void do_link(char *text) {
+    fprintf(stderr, "link");
+    char *text_start = text + 1;
+    char *text_end = strchr(text_start, ']');
+    *text_end = '\0';
+
+    char *url_start = text_end+2;
+    char *url_end = strchr(url_start, ')');
+    *url_end = '\0';
+
+    fprintf(args.output, "\n.pdfhref W -D %s -- %s\n", url_start, text_start);
+}
 
 void do_pre(char *text, MSTag type) {
 	fprintf(args.output, "\n");
@@ -73,7 +123,7 @@ void do_pre(char *text, MSTag type) {
 		case PRE_SH3: fprintf(args.output, ".NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
 		case PRE_SH4: fprintf(args.output, ".NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
 		case PRE_SH5: fprintf(args.output, ".NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
-		case PRE_IP:  fprintf(args.output, ".IP - \n%s", strip_whitespace(&text[2])); break;
+		case PRE_IP:  fprintf(args.output, ".IP - \n"); break;
 	}
 	fprintf(args.output, "\n");
 }
