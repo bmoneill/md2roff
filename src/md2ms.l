@@ -72,14 +72,12 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
         in_codeblock = 0;
     }
     ^([^\n]*\n) {
-        // Buffer any line except the closing delimiter
         if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
             memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
             codeblock_len += yyleng;
         }
     }
     . {
-        // Catch any remaining characters (shouldn't happen, but prevents infinite loops)
         if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
             memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
             codeblock_len += yyleng;
@@ -87,18 +85,18 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
     }
 }
 "["{STRING}+"]("{STRING}+")" { do_link(yytext); }
-"# "{STRING}+"\n" do_pre(yytext, PRE_SH1);
-"## "{STRING}+"\n" do_pre(yytext, PRE_SH2);
-"### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
-"#### "{STRING}+"\n" do_pre(yytext, PRE_SH4);
-"##### "{STRING}+"\n" do_pre(yytext, PRE_SH5);
-"\n* " do_pre(yytext, PRE_IP);
-"\n- "{STRING}+"\n" do_pre(yytext, PRE_IP);
-"***"{STRING}+"***" do_surround(yytext, SUR_BI);
-"**"{STRING}+"**" do_surround(yytext, SUR_B);
-"*"{STRING}+"*" do_surround(yytext, SUR_I);
-"__"{STRING}+"__" do_surround(yytext, SUR_UL);
-"`"{STRING}+"`" do_surround(yytext, SUR_M);
+"# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
+"## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
+"### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
+"#### "{STRING}+"\n" { do_pre(yytext, PRE_SH4); }
+"##### "{STRING}+"\n" { do_pre(yytext, PRE_SH5); }
+"\n* " { do_pre(yytext, PRE_IP); }
+"\n- "{STRING}+"\n" { do_pre(yytext, PRE_IP); }
+"***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
+"**"{STRING}+"**" { do_surround(yytext, SUR_B); }
+"*"{STRING}+"*" { do_surround(yytext, SUR_I); }
+"__"{STRING}+"__" { do_surround(yytext, SUR_UL); }
+"`"{STRING}+"`" { do_surround(yytext, SUR_M); }
 "\n\n" { fprintf(args.output, "\n.PP\n"); }
 %%
 
