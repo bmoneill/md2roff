@@ -49,7 +49,7 @@ md2roff_args_t args;
 STRING [a-zA-Z0-9!@#$%^&(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 
 %%
-"```"{STRING}+"\n"{STRING}+"\n```" do_surround(yytext, SUR_MULTILINE_M);
+"```"{STRING}+"\n"{STRING}+"\n```\n" do_surround(yytext, SUR_MULTILINE_M);
 "# "{STRING}+"\n" do_pre(yytext, PRE_SH1);
 "## "{STRING}+"\n" do_pre(yytext, PRE_SH2);
 "### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
@@ -87,7 +87,6 @@ void do_surround(char *text, MSTag type) {
 		case SUR_M: fprintf(args.output, "\\fC%s\\fR", strip_surround(text, 1)); break;
         case SUR_MULTILINE_M: surround_multiline(".IP\n.DS L\n.ft C\n%s\n.ft\n", text, 3); break;
 	}
-	fprintf(args.output, "\n");
 }
 
 void surround_multiline(const char *fmt, char *text, int count) {
