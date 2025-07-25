@@ -24,15 +24,6 @@ typedef enum {
 	SUR_MULTILINE_M,
 } MSTag;
 
-void do_link(char *);
-void do_pre(char *, MSTag);
-void do_surround(char *, MSTag);
-int parse_args(int, char **);
-void print_head(void);
-void surround_multiline(const char *, char *, int);
-
-void usage(char *argv0);
-
 typedef struct {
 	FILE *input;
 	FILE *output;
@@ -40,8 +31,16 @@ typedef struct {
 	char *author;
 	uint8_t flags;
 } md2roff_args_t;
-md2roff_args_t args;
 
+void do_link(char *);
+void do_pre(char *, MSTag);
+void do_surround(char *, MSTag);
+int parse_args(int, char **);
+void print_head(void);
+void surround_multiline(const char *, char *, int);
+void usage(char *argv0);
+
+md2roff_args_t args;
 char codeblock_buf[65536];
 size_t codeblock_len = 0;
 int in_codeblock = 0;
