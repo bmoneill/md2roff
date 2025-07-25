@@ -27,33 +27,78 @@ typedef struct {
 	uint8_t flags;
 } MD2ManArgs;
 
-MD2ManArgs args;
-
+void do_link(char *);
 void do_pre(char *, ManTag);
 void do_surround(char *, ManTag);
 int parse_args(int, char **);
 void print_head(void);
 void usage(char *argv0);
+
+MD2ManArgs args;
+char codeblock_buf[65536];
+size_t codeblock_len = 0;
+int in_codeblock = 0;
 %}
 
 %option noyywrap
 %option yylineno
 %option no
-STRING [a-zA-Z0-9!@#$%^&*(),.?/\\\-<>|\{\}\[\]\"\' \t]
+STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
+%x CODEBLOCK
+%%
+"```"[^\n]*\n    {
+    if (!in_codeblock) {
+        codeblock_len = 0;
+        in_codeblock = 1;
+        codeblock_buf[0] = '\0';
+        BEGIN(CODEBLOCK);
+    }
+}
 
+<CODEBLOCK>{
+    "```"[^\n]*\n   {
+        // End of code block
+        BEGIN(INITIAL);
+        codeblock_buf[codeblock_len] = '\0';
+        fprintf(args.output, ".RS\n.ft CR\n.nf\n.eo\n%s\n.ec\n.fi\n.ft R\n.RE", codeblock_buf);
+        in_codeblock = 0;
+    }
+    ^([^\n]*\n) {
+        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
+            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
+            codeblock_len += yyleng;
+        }
+    }
+    . {
+        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
+            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
+            codeblock_len += yyleng;
+        }
+    }
+}
+"["{STRING}+"]("{STRING}+")" { do_link(yytext); }
+"# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
+"## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
+"### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
+"#### "{STRING}+"\n" { do_pre(yytext, PRE_SH4); }
+"##### "{STRING}+"\n" { do_pre(yytext, PRE_SH5); }
+"\n* " { do_pre(yytext, PRE_IP); }
+"\n- " { do_pre(yytext, PRE_IP); }
+"***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
+"**"{STRING}+"**" { do_surround(yytext, SUR_B); }
+"*"{STRING}+"*" { do_surround(yytext, SUR_I); }
+"__"{STRING}+"__" { do_surround(yytext, SUR_UL); }
+"`"{STRING}+"`" { do_surround(yytext, SUR_M); }
+"." { fprintf(args.output, "\\."); }
 %%
-"# "{STRING}+"\n" do_pre(yytext, PRE_SH1);
-"## "{STRING}+"\n" do_pre(yytext, PRE_SH2);
-"### "{STRING}+"\n" do_pre(yytext, PRE_SH3);
-"#### "{STRING}+"\n" do_pre(yytext, PRE_SH4);
-"##### "{STRING}+"\n" do_pre(yytext, PRE_SH5);
-"* " do_pre(yytext, PRE_IP);
-"***"{STRING}+"***" do_surround(yytext, SUR_BI);
-"**"{STRING}+"**" do_surround(yytext, SUR_B);
-"*"{STRING}+"*" do_surround(yytext, SUR_I);
-"__"{STRING}+"__" do_surround(yytext, SUR_UL);
-"`"{STRING}+"`" do_surround(yytext, SUR_M);
-%%
+
+void do_link(char *text) {
+    fprintf(stderr, "link: %s\n", text);
+    char *text_start = text + 1;
+    char *text_end = strchr(text_start, ']');
+    *text_end = '\0';
+    fprintf(args.output, "%s", text_start);
+}
 
 void do_pre(char *text, ManTag type) {
 	switch (type) {
@@ -80,15 +125,9 @@ int parse_args(int argc, char **argv) {
 	int opt;
 	while ((opt = getopt(argc, argv, "o:t:")) != -1) {
 		switch (opt) {
-			case 'o':
-				args.output = open_file(argv[optind], "w");
-				break;
-			case 't':
-				args.title = optarg;
-				break;
-			default:
-				usage(argv[0]);
-				return 0;
+			case 'o': args.output = open_file(argv[optind], "w"); break;
+			case 't': args.title = optarg; break;
+			default: usage(argv[0]); return 0;
 		}
 	}
 

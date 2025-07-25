@@ -100,6 +100,7 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 %%
 
 void do_link(char *text) {
+    fprintf(stderr, "link: %s\n", text);
     char *text_start = text + 1;
     char *text_end = strchr(text_start, ']');
     *text_end = '\0';
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
 	args.output = stdout;
 	args.flags = 0;
 
-	if (!parse_args(argc, argv)) {
+	if (parse_args(argc, argv)) {
 		print_head();
 		yyin = args.input;
 		yylex();
