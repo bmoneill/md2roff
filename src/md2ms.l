@@ -143,36 +143,23 @@ void surround_multiline(const char *fmt, char *text, int count) {
     }
 }
 
-
 int parse_args(int argc, char **argv) {
 	int opt;
 	while ((opt = getopt(argc, argv, "a:bno:pt:")) != -1) {
 		switch (opt) {
-			case 'b':
-				args.flags |= FLAG_BREAK_FRONT_PAGE;
-				break;
-			case 'n':
-				args.flags |= FLAG_NO_DATE_DISPLAY;
-				break;
-			case 'o':
-				args.output = open_file(argv[optind], "w");
-				break;
-			case 't':
-				args.title = optarg;
-				break;
-			case 'a':
-				args.author = optarg;
-				break;
-			default:
-				usage(argv[0]);
-				return 1;
+			case 'b': args.flags |= FLAG_BREAK_FRONT_PAGE; break;
+			case 'n': args.flags |= FLAG_NO_DATE_DISPLAY; break;
+			case 'o': args.output = open_file(argv[optind], "w"); break;
+			case 't': args.title = optarg; break;
+			case 'a': args.author = optarg; break;
+			default: usage(argv[0]); return 0;
 		}
 	}
 
 	if (optind < argc) {
 		args.input = open_file(argv[optind], "r");
 	}
-	return 0;
+	return 1;
 }
 
 void print_head() {
