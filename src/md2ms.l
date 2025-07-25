@@ -27,7 +27,6 @@ typedef enum {
 void do_link(char *);
 void do_pre(char *, MSTag);
 void do_surround(char *, MSTag);
-FILE *open_file(const char *, const char *);
 int parse_args(int, char **);
 void print_head(void);
 void surround_multiline(const char *, char *, int);
