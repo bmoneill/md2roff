@@ -25,6 +25,8 @@ are `stdin` and `stdout` by default.
 md2roff [-ms|-man] [-t title] [-o outputfile] [args...] [inputfile]
 ```
 
+Note: `md2roff` must be installed for the wrapper to work.
+
 ## Options
 
 ### md2ms
