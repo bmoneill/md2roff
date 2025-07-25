@@ -1,4 +1,4 @@
-/*
+/**
  * @file md2roff.c
  * @brief wrapper for md2man and md2ms
  * @author Ben O'Neill <ben@oneill.sh>
