@@ -182,7 +182,6 @@ int parse_args(int argc, char **argv) {
 
 void print_head() {
 	fprintf(args.output, ".fp 8 CW\n");
-	return ;
 	if (args.flags & FLAG_BREAK_FRONT_PAGE) {
 		fprintf(args.output, ".RP no\n");
 	}
