@@ -5,15 +5,7 @@
 
 #include "util.h"
 
-void do_pre(char *, int);
-void do_surround(char *, int);
-FILE *open_file(const char *, const char *);
-int parse_args(int, char **);
-void print_head(void);
-
-void usage(char *argv0);
-
-enum {
+typedef enum {
 	PRE_SH1 = 1,
 	PRE_SH2,
 	PRE_SH3,
@@ -25,16 +17,23 @@ enum {
 	SUR_I,
 	SUR_UL,
 	SUR_M
-};
+} ManTag;
 
-typedef struct md2roff_args_s {
+typedef struct {
 	FILE *input;
 	FILE *output;
 	char *title;
 	char *author;
 	uint8_t flags;
-} md2roff_args_t;
-md2roff_args_t args;
+} MD2ManArgs;
+
+MD2ManArgs args;
+
+void do_pre(char *, ManTag);
+void do_surround(char *, ManTag);
+int parse_args(int, char **);
+void print_head(void);
+void usage(char *argv0);
 %}
 
 %option noyywrap
@@ -56,7 +55,7 @@ STRING [a-zA-Z0-9!@#$%^&*(),.?/\\\-<>|\{\}\[\]\"\' \t]
 "`"{STRING}+"`" do_surround(yytext, SUR_M);
 %%
 
-void do_pre(char *text, int type) {
+void do_pre(char *text, ManTag type) {
 	switch (type) {
 		case PRE_SH1: fprintf(args.output, ".TH %s\n", strip_whitespace(&text[2])); break;
 		case PRE_SH2: fprintf(args.output, ".SH %s\n", strip_whitespace(&text[3])); break;
@@ -67,7 +66,7 @@ void do_pre(char *text, int type) {
 	}
 }
 
-void do_surround(char *text, int type) {
+void do_surround(char *text, ManTag type) {
 	switch (type) {
 		case SUR_BI: fprintf(args.output, "\\fB%s\\fP", strip_surround(text, 3)); break;
 		case SUR_B: fprintf(args.output, "\\fB%s\\fP", strip_surround(text, 2)); break;
