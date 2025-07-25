@@ -8,7 +8,7 @@ all: $(TARGS)
 
 gen-examples: all
 	$(shell ./md2man < README.md > examples/README.1)
-	$(shell ./md2ms README.md | groff -ms -Tpdf > examples/README.pdf)
+	$(shell ./md2ms -n -t "md2roff" README.md | groff -ms -Tpdf > examples/README.pdf)
 
 md2roff:
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c
