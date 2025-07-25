@@ -6,6 +6,10 @@ SRC = src/md2ms.l src/md2man.l src/md2roff.c src/util.c src/util.h
 
 all: $(TARGS)
 
+gen-examples: all
+	$(shell ./md2man < README.md > README.1)
+	$(shell ./md2ms README.md | groff -ms -Tpdf > README.pdf)
+
 md2roff:
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c
 
