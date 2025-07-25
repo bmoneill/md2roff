@@ -5,6 +5,7 @@
 
 #include "util.h"
 
+#define FLAG_FIRST_HEADER_TITLE 0x1
 #define FLAG_BREAK_FRONT_PAGE 0x2
 #define FLAG_NO_DATE_DISPLAY 0x4
 
@@ -45,6 +46,7 @@ md2roff_args_t args;
 char codeblock_buf[65536];
 size_t codeblock_len = 0;
 int in_codeblock = 0;
+int first_header_parsed = 0;
 %}
 
 %option noyywrap
@@ -134,7 +136,14 @@ int escape(char c) {
 
 void do_pre(char *text, MSTag type) {
 	switch (type) {
-		case PRE_SH1: fprintf(args.output, "\n.NH 1\n%s\n.PP", strip_whitespace(&text[2])); break;
+		case PRE_SH1:
+            if (args.flags & FLAG_FIRST_HEADER_TITLE && !first_header_parsed) {
+                fprintf(args.output, ".TL\n%s\n.PP\n", strip_whitespace(&text[2]));
+                first_header_parsed = 1;
+            } else {
+                fprintf(args.output, "\n.NH 1\n%s\n.PP", strip_whitespace(&text[2]));
+            }
+            break;
 		case PRE_SH2: fprintf(args.output, "\n.NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
 		case PRE_SH3: fprintf(args.output, "\n.NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
 		case PRE_SH4: fprintf(args.output, "\n.NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
@@ -163,10 +172,11 @@ void surround_multiline(const char *fmt, char *text, int count) {
 
 int parse_args(int argc, char **argv) {
 	int opt;
-	while ((opt = getopt(argc, argv, "a:bno:pt:")) != -1) {
+	while ((opt = getopt(argc, argv, "a:bno:pt:T")) != -1) {
 		switch (opt) {
 			case 'b': args.flags |= FLAG_BREAK_FRONT_PAGE; break;
 			case 'n': args.flags |= FLAG_NO_DATE_DISPLAY; break;
+            case 'T': args.flags |= FLAG_FIRST_HEADER_TITLE; break;
 			case 'o': args.output = open_file(argv[optind], "w"); break;
 			case 't': args.title = optarg; break;
 			case 'a': args.author = optarg; break;
