@@ -4,8 +4,6 @@
 for converting Markdown files to printable PDFs or generating a manpage from
 a Markdown file.
 
-Note: `md2man` is in an experimental stage and likely will not work correctly.
-
 ## Prerequisites
 
 * A [lex](https://github.com/westes/flex/).
