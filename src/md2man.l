@@ -102,12 +102,12 @@ void do_link(char *text) {
 
 void do_pre(char *text, ManTag type) {
 	switch (type) {
-		case PRE_SH1: fprintf(args.output, ".TH %s\n", strip_whitespace(&text[2])); break;
-		case PRE_SH2: fprintf(args.output, ".SH %s\n", strip_whitespace(&text[3])); break;
-		case PRE_SH3: fprintf(args.output, ".SH %s\n", strip_whitespace(&text[4])); break;
-		case PRE_SH4: fprintf(args.output, ".SH %s\n", strip_whitespace(&text[5])); break;
-		case PRE_SH5: fprintf(args.output, ".SH %s\n", strip_whitespace(&text[6])); break;
-		case PRE_IP:  fprintf(args.output, ".TP\n"); break;
+		case PRE_SH1: fprintf(args.output, "\n.TH %s\n", strip_whitespace(&text[2])); break;
+		case PRE_SH2: fprintf(args.output, "\n.SH %s\n", strip_whitespace(&text[3])); break;
+		case PRE_SH3: fprintf(args.output, "\n.SH %s\n", strip_whitespace(&text[4])); break;
+		case PRE_SH4: fprintf(args.output, "\n.SH %s\n", strip_whitespace(&text[5])); break;
+		case PRE_SH5: fprintf(args.output, "\n.SH %s\n", strip_whitespace(&text[6])); break;
+		case PRE_IP:  fprintf(args.output, "\n.TP\n"); break;
 	}
 }
 
