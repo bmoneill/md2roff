@@ -1,6 +1,10 @@
 include config.mk
 
-all: md2ms md2man md2roff
+all: $(TARGS)
+
+TARGS = md2ms md2man md2roff
+MAN = doc/md2ms.1 doc/md2man.1 doc/md2roff.1
+SRC = src/md2ms.l src/md2man.l src/md2roff.c src/util.c src/util.h
 
 md2roff:
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c
@@ -19,7 +23,15 @@ src/util.o: src/util.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
 clean:
-	rm -f md2ms md2man md2roff src/*lex.yy.o src/*lex.yy.c src/util.o
+	rm -f md2ms md2man md2roff src/*lex.yy.o src/*lex.yy.c src/util.o md2
+
+dist: clean
+	mkdir -p dist
+	cp -r doc/ dist/doc
+	cp -r src/ dist/src
+	cp config.mk LICENSE Makefile README.md dist/
+	tar -czf md2roff-$(VERSION).tar.gz -C dist .
+	rm -rf dist/
 
 install: md2ms md2man md2roff
 	cp md2roff md2ms md2man $(PREFIX)/bin
@@ -36,4 +48,4 @@ uninstall:
 		  $(MANPREFIX)/man1/md2roff.1 $(MANPREFIX)/man1/md2ms.1 \
 		  $(MANPREFIX)/man1/md2man.1
 
-.PHONY: all clean md2ms md2man md2roff install uninstall
+.PHONY: all clean dist $(TARGS) install uninstall
