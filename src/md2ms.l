@@ -90,7 +90,7 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 "#### "{STRING}+"\n" { do_pre(yytext, PRE_SH4); }
 "##### "{STRING}+"\n" { do_pre(yytext, PRE_SH5); }
 "\n* " { do_pre(yytext, PRE_IP); }
-"\n- "{STRING}+"\n" { do_pre(yytext, PRE_IP); }
+"\n- " { do_pre(yytext, PRE_IP); }
 "***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
 "**"{STRING}+"**" { do_surround(yytext, SUR_B); }
 "*"{STRING}+"*" { do_surround(yytext, SUR_I); }
