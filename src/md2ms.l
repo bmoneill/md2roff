@@ -68,7 +68,7 @@ SPACE [ \t]+
         // End of code block
         BEGIN(INITIAL);
         codeblock_buf[codeblock_len] = '\0';
-        fprintf(args.output, ".IP\n.DS L\n.ft C\n%s\n.ft\n", codeblock_buf);
+        fprintf(args.output, ".IP\n.DS L\n.ft C\n%s\n.ft\n.PP", codeblock_buf);
         in_codeblock = 0;
     }
     ^([^\n]*\n) {
@@ -150,7 +150,6 @@ void do_surround(char *text, MSTag type) {
 		case SUR_I: fprintf(args.output, "\\fI%s\\fR", strip_surround(text, 1)); break;
 		case SUR_UL: fprintf(args.output, ".UL\n%s\n.R", strip_surround(text, 2)); break;
 		case SUR_M: fprintf(args.output, "\\fC%s\\fR", strip_surround(text, 1)); break;
-        case SUR_MULTILINE_M: surround_multiline(".IP\n.DS L\n.ft C\n%s\n.ft\n", text, 3); break;
 	}
 }
 
