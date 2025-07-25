@@ -35,6 +35,7 @@ typedef struct {
 void do_link(char *);
 void do_pre(char *, MSTag);
 void do_surround(char *, MSTag);
+int escape(char c);
 int parse_args(int, char **);
 void print_head(void);
 void surround_multiline(const char *, char *, int);
@@ -83,7 +84,7 @@ SPACE [ \t]+
         }
     }
 }
-"["{STRING}+"]("{STRING}+")"{SPACE} { do_link(yytext); }
+"["{STRING}+"]("{STRING}+")"{STRING} { do_link(yytext); }
 "# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
 "## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
 "### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
@@ -109,20 +110,37 @@ void do_link(char *text) {
     char *url_end = strchr(url_start, ')');
     *url_end = '\0';
 
+    char *after_url = url_end + 1;
     fprintf(args.output, "\n.pdfhref W -D %s -- %s\n", url_start, text_start);
+    if (*after_url != '\0' && *after_url != '\n' && *after_url != ' ' && *after_url != '\t') {
+        if (escape(*after_url)) {
+            fprintf(args.output, "\\%s", after_url);
+        } else {
+            fprintf(args.output, "%s", after_url);
+        }
+    }
+
+}
+
+int escape(char c) {
+    char escaped_chars[] = {'\\', '\n', '\t', '.'};
+    for (int i = 0; i < sizeof(escaped_chars); i++) {
+        if (c == escaped_chars[i]) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void do_pre(char *text, MSTag type) {
-	fprintf(args.output, "\n");
 	switch (type) {
-		case PRE_SH1: fprintf(args.output, ".NH 1\n%s\n.PP", strip_whitespace(&text[2])); break;
-		case PRE_SH2: fprintf(args.output, ".NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
-		case PRE_SH3: fprintf(args.output, ".NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
-		case PRE_SH4: fprintf(args.output, ".NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
-		case PRE_SH5: fprintf(args.output, ".NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
-		case PRE_IP:  fprintf(args.output, ".IP - \n"); break;
+		case PRE_SH1: fprintf(args.output, "\n.NH 1\n%s\n.PP", strip_whitespace(&text[2])); break;
+		case PRE_SH2: fprintf(args.output, "\n.NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
+		case PRE_SH3: fprintf(args.output, "\n.NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
+		case PRE_SH4: fprintf(args.output, "\n.NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
+		case PRE_SH5: fprintf(args.output, "\n.NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
+		case PRE_IP:  fprintf(args.output, "\n.IP - \n"); break;
 	}
-	fprintf(args.output, "\n");
 }
 
 void do_surround(char *text, MSTag type) {
