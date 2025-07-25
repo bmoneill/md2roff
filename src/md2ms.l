@@ -50,6 +50,7 @@ int in_codeblock = 0;
 %option yylineno
 %option no
 STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
+SPACE [ \t]+
 %x CODEBLOCK
 %%
 "```"[^\n]*\n    {
@@ -82,7 +83,7 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
         }
     }
 }
-"["{STRING}+"]("{STRING}+")" { do_link(yytext); }
+"["{STRING}+"]("{STRING}+")"{SPACE} { do_link(yytext); }
 "# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
 "## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
 "### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
