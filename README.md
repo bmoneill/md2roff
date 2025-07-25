@@ -32,11 +32,12 @@ Note: `md2roff` must be installed for the wrapper to work.
 ### md2ms
 
 ```shell
-md2ms [-bnp] [-t title] [-a author] [-o outputfile] [inputfile]
+md2ms [-bnT] [-t title] [-a author] [-o outputfile] [inputfile]
 ```
 
 * `-b`: Disable page break between the title page and contents.
 * `-n`: Disable display of the current date.
+* `-T`: Use the first heading (`#`) as the document title.
 * `-t title`: Set the document title.
 * `-a author`: Set the document author.
 * `-o outputfile`: Set the output file.
