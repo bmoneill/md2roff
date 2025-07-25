@@ -1,10 +1,10 @@
 include config.mk
 
-all: $(TARGS)
-
 TARGS = md2ms md2man md2roff
 MAN = doc/md2ms.1 doc/md2man.1 doc/md2roff.1
 SRC = src/md2ms.l src/md2man.l src/md2roff.c src/util.c src/util.h
+
+all: $(TARGS)
 
 md2roff:
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c
