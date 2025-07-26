@@ -19,25 +19,12 @@ typedef enum {
 	SUR_M
 } ManTag;
 
-typedef struct {
-	FILE *input;
-	FILE *output;
-	char *title;
-	char *author;
-	uint8_t flags;
-} MD2ManArgs;
-
 void do_link(char *);
 void do_pre(char *, ManTag);
 void do_surround(char *, ManTag);
 int parse_args(int, char **);
 void print_head(void);
 void usage(char *argv0);
-
-MD2ManArgs args;
-char codeblock_buf[65536];
-size_t codeblock_len = 0;
-int in_codeblock = 0;
 %}
 
 %option noyywrap
@@ -47,10 +34,10 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 %x CODEBLOCK
 %%
 "```"[^\n]*\n    {
-    if (!in_codeblock) {
-        codeblock_len = 0;
-        in_codeblock = 1;
-        codeblock_buf[0] = '\0';
+    if (!codeblock.active) {
+        codeblock.length = 0;
+        codeblock.active = true;
+        codeblock.buffer[0] = '\0';
         BEGIN(CODEBLOCK);
     }
 }
@@ -59,20 +46,20 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
     "```"[^\n]*\n   {
         // End of code block
         BEGIN(INITIAL);
-        codeblock_buf[codeblock_len] = '\0';
-        fprintf(args.output, ".RS\n.ft CR\n.nf\n.eo\n%s\n.ec\n.fi\n.ft R\n.RE", codeblock_buf);
-        in_codeblock = 0;
+        codeblock.buffer[codeblock.length] = '\0';
+        fprintf(args.output, ".RS\n.ft CR\n.nf\n.eo\n%s\n.ec\n.fi\n.ft R\n.RE", codeblock.buffer);
+        codeblock.active = false;
     }
     ^([^\n]*\n) {
-        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
-            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
-            codeblock_len += yyleng;
+        if (codeblock.length + yyleng < sizeof(codeblock.buffer) - 1) {
+            memcpy(codeblock.buffer + codeblock.length, yytext, yyleng);
+            codeblock.length += yyleng;
         }
     }
     . {
-        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
-            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
-            codeblock_len += yyleng;
+        if (codeblock.length + yyleng < sizeof(codeblock.buffer) - 1) {
+            memcpy(codeblock.buffer + codeblock.length, yytext, yyleng);
+            codeblock.length += yyleng;
         }
     }
 }

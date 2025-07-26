@@ -4,6 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+MD2RoffArgs args = {
+    .input = NULL,
+    .output = NULL,
+    .title = NULL,
+    .author = NULL,
+    .flags = 0
+};
+
+CodeBlock codeblock = {
+    .buffer = {0},
+    .length = 0,
+    .active = false
+};
+
 FILE *open_file(const char *path, const char *flags) {
 	FILE *f = fopen(path, flags);
 	if (!f) {

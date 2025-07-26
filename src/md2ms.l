@@ -8,6 +8,7 @@
 #define FLAG_FIRST_HEADER_TITLE 0x1
 #define FLAG_BREAK_FRONT_PAGE 0x2
 #define FLAG_NO_DATE_DISPLAY 0x4
+#define MAX_CODEBLOCK_SIZE 65536
 
 typedef enum {
 	PRE_TL,
@@ -25,14 +26,6 @@ typedef enum {
 	SUR_MULTILINE_M,
 } MSTag;
 
-typedef struct {
-	FILE *input;
-	FILE *output;
-	char *title;
-	char *author;
-	uint8_t flags;
-} MD2MSArgs;
-
 void do_link(char *);
 void do_pre(char *, MSTag);
 void do_surround(char *, MSTag);
@@ -42,11 +35,7 @@ void print_head(void);
 void surround_multiline(const char *, char *, int);
 void usage(char *argv0);
 
-MD2MSArgs args;
-char codeblock_buf[65536];
-size_t codeblock_len = 0;
-int in_codeblock = 0;
-int first_header_parsed = 0;
+bool first_header_parsed = false;
 %}
 
 %option noyywrap
@@ -57,10 +46,10 @@ SPACE [ \t]+
 %x CODEBLOCK
 %%
 "```"[^\n]*\n    {
-    if (!in_codeblock) {
-        codeblock_len = 0;
-        in_codeblock = 1;
-        codeblock_buf[0] = '\0';
+    if (!codeblock.active) {
+        codeblock.length = 0;
+        codeblock.active = true;
+        codeblock.buffer[0] = '\0';
         BEGIN(CODEBLOCK);
     }
 }
@@ -69,20 +58,20 @@ SPACE [ \t]+
     "```"[^\n]*\n   {
         // End of code block
         BEGIN(INITIAL);
-        codeblock_buf[codeblock_len] = '\0';
-        fprintf(args.output, ".IP\n.DS L\n.ft C\n%s\n.ft\n.PP", codeblock_buf);
-        in_codeblock = 0;
+        codeblock.buffer[codeblock.length] = '\0';
+        fprintf(args.output, ".IP\n.DS L\n.ft C\n%s\n.ft\n.PP", codeblock.buffer);
+        codeblock.active = false;
     }
     ^([^\n]*\n) {
-        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
-            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
-            codeblock_len += yyleng;
+        if (codeblock.length + yyleng < sizeof(codeblock.buffer) - 1) {
+            memcpy(codeblock.buffer + codeblock.length, yytext, yyleng);
+            codeblock.length += yyleng;
         }
     }
     . {
-        if (codeblock_len + yyleng < sizeof(codeblock_buf) - 1) {
-            memcpy(codeblock_buf + codeblock_len, yytext, yyleng);
-            codeblock_len += yyleng;
+        if (codeblock.length + yyleng < sizeof(codeblock.buffer) - 1) {
+            memcpy(codeblock.buffer + codeblock.length, yytext, yyleng);
+            codeblock.length += yyleng;
         }
     }
 }
