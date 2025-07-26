@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
 	        execvp("md2man", &argv[1]);
 	    }
 	} else {
-        printf("Usage: %s [-ms|-man] [args]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [-ms|-man] [args]\n", argv[0]);
+        return 1;
     }
 
     fprintf(stderr, "Error: Failed to execute subprocess.\n");
