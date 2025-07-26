@@ -6,7 +6,7 @@
 #include "util.h"
 
 typedef enum {
-	PRE_SH1 = 1,
+	PRE_SH1,
 	PRE_SH2,
 	PRE_SH3,
 	PRE_SH4,
