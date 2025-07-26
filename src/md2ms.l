@@ -31,7 +31,7 @@ typedef struct {
 	char *title;
 	char *author;
 	uint8_t flags;
-} md2ms_args_t;
+} MD2MSArgs;
 
 void do_link(char *);
 void do_pre(char *, MSTag);
@@ -42,7 +42,7 @@ void print_head(void);
 void surround_multiline(const char *, char *, int);
 void usage(char *argv0);
 
-md2ms_args_t args;
+MD2MSArgs args;
 char codeblock_buf[65536];
 size_t codeblock_len = 0;
 int in_codeblock = 0;
