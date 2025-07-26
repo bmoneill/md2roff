@@ -16,7 +16,6 @@
 #define MD2MAN "md2roff -man"
 
 int main(int argc, char *argv[]) {
-
 	if (argc > 1) {
 	    if (!strcmp(argv[1], "-ms")) {
 	        argv[1] = (char *) malloc(strlen(MD2MS));
@@ -27,8 +26,10 @@ int main(int argc, char *argv[]) {
 			strcpy(argv[1], MD2MAN);
 	        execvp("md2man", &argv[1]);
 	    }
-	}
+	} else {
+        printf("Usage: %s [-ms|-man] [args]\n", argv[0]);
+    }
 
-    printf("Usage: %s [-ms|-man] [args]\n", argv[0]);
-    return 0;
+    fprintf(stderr, "Error: Failed to execute subprocess.\n");
+    return 1;
 }
