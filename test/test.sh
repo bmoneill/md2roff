@@ -1,10 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 [ -z "$MD2MS" ] && echo "MD2MS environment variable is not set." && exit 1
 [ -z "$MD2MAN" ] && echo "MD2MAN environment variable is not set." && exit 1
 
 TEST_INPUT_DIR="$PWD/test/input"
 TEST_OUTPUT_DIR="$PWD/test/output"
+PASSED=0
+FAILED=0
 
 test_md2ms() {
     local input_file="$1"
@@ -32,9 +34,11 @@ test_md2man() {
 
     if diff -qw "$output_file" "$expected_output_file"; then
         echo "Test passed for $input_file"
+        PASSED=$((PASSED + 1))
     else
         echo "Test failed for $input_file"
         diff "$output_file" "$expected_output_file"
+        FAILED=$((FAILED + 1))
     fi
 
     rm -f "$output_file"
@@ -45,3 +49,10 @@ for f in "$TEST_INPUT_DIR"/*.md; do
     test_md2ms "$f" "$TEST_OUTPUT_DIR/${base_name}.ms"
     test_md2man "$f" "$TEST_OUTPUT_DIR/${base_name}.man"
 done
+
+echo "Tests completed: $PASSED passed, $FAILED failed."
+if [ $FAILED -ne 0 ]; then
+    exit 1
+else
+    exit 0
+fi
