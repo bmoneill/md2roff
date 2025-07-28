@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #define MAX_CODEBLOCK_SIZE 65536
+#define PRINT_OUTPUT(...) fprintf(args.output, __VA_ARGS__)
 typedef struct {
 	FILE *input;
 	FILE *output;

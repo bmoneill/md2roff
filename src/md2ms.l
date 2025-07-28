@@ -8,7 +8,6 @@
 #define FLAG_FIRST_HEADER_TITLE 0x1
 #define FLAG_BREAK_FRONT_PAGE 0x2
 #define FLAG_NO_DATE_DISPLAY 0x4
-#define MAX_CODEBLOCK_SIZE 65536
 
 typedef enum {
 	PRE_TL,
@@ -76,20 +75,20 @@ SPACE [ \t]+
     }
 }
 "["{STRING}+"]("{STRING}+")"{STRING} { do_link(yytext); }
-"# "{STRING}+"\n" { do_pre(yytext, PRE_SH1); }
-"## "{STRING}+"\n" { do_pre(yytext, PRE_SH2); }
-"### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
-"#### "{STRING}+"\n" { do_pre(yytext, PRE_SH4); }
-"##### "{STRING}+"\n" { do_pre(yytext, PRE_SH5); }
-"\n* " { do_pre(yytext, PRE_IP_BULLET); }
-"\n- " { do_pre(yytext, PRE_IP_DASH); }
-"***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
-"**"{STRING}+"**" { do_surround(yytext, SUR_B); }
-"*"{STRING}+"*" { do_surround(yytext, SUR_I); }
-"__"{STRING}+"__" { do_surround(yytext, SUR_B); }
-"`"{STRING}+"`" { do_surround(yytext, SUR_M); }
-"\n\n" { fprintf(args.output, "\n.PP\n"); }
-"." { fprintf(args.output, "\\."); }
+"# "{STRING}+"\n"                    { do_pre(yytext, PRE_SH1); }
+"## "{STRING}+"\n"                   { do_pre(yytext, PRE_SH2); }
+"### "{STRING}+"\n"                  { do_pre(yytext, PRE_SH3); }
+"#### "{STRING}+"\n"                 { do_pre(yytext, PRE_SH4); }
+"##### "{STRING}+"\n"                { do_pre(yytext, PRE_SH5); }
+"\n* "                               { do_pre(yytext, PRE_IP_BULLET); }
+"\n- "                               { do_pre(yytext, PRE_IP_DASH); }
+"***"{STRING}+"***"                  { do_surround(yytext, SUR_BI); }
+"**"{STRING}+"**"                    { do_surround(yytext, SUR_B); }
+"*"{STRING}+"*"                      { do_surround(yytext, SUR_I); }
+"__"{STRING}+"__"                    { do_surround(yytext, SUR_B); }
+"`"{STRING}+"`"                      { do_surround(yytext, SUR_M); }
+"\n\n"                               { PRINT_OUTPUT("\n.PP\n"); }
+"."                                  { PRINT_OUTPUT("\\."); }
 %%
 
 void do_link(char *text) {
@@ -102,12 +101,12 @@ void do_link(char *text) {
     *url_end = '\0';
 
     char *after_url = url_end + 1;
-    fprintf(args.output, "\n.pdfhref W -D %s -- %s\n", url_start, text_start);
+    PRINT_OUTPUT("\n.pdfhref W -D %s -- %s\n", url_start, text_start);
     if (*after_url != '\0' && *after_url != '\n' && *after_url != ' ' && *after_url != '\t') {
         if (escape(*after_url)) {
-            fprintf(args.output, "\\%s", after_url);
+            PRINT_OUTPUT("\\%s", after_url);
         } else {
-            fprintf(args.output, "%s", after_url);
+            PRINT_OUTPUT("%s", after_url);
         }
     }
 
@@ -130,31 +129,31 @@ void do_pre(char *text, MSTag type) {
                 fprintf(args.output, ".TL\n%s\n.PP\n", strip_whitespace(&text[2]));
                 first_header_parsed = 1;
             } else {
-                fprintf(args.output, "\n.NH 1\n%s\n.PP", strip_whitespace(&text[2]));
+                PRINT_OUTPUT("\n.NH 1\n%s\n.PP", strip_whitespace(&text[2]));
             }
             break;
-		case PRE_SH2: fprintf(args.output, "\n.NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
-		case PRE_SH3: fprintf(args.output, "\n.NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
-		case PRE_SH4: fprintf(args.output, "\n.NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
-		case PRE_SH5: fprintf(args.output, "\n.NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
-		case PRE_IP_BULLET: fprintf(args.output, "\n.IP \\(bu \n"); break;
-		case PRE_IP_DASH: fprintf(args.output, "\n.IP - \n"); break;
+		case PRE_SH2:       PRINT_OUTPUT("\n.NH 2\n%s\n.PP", strip_whitespace(&text[3])); break;
+		case PRE_SH3:       PRINT_OUTPUT("\n.NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
+		case PRE_SH4:       PRINT_OUTPUT("\n.NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
+		case PRE_SH5:       PRINT_OUTPUT("\n.NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
+		case PRE_IP_BULLET: PRINT_OUTPUT("\n.IP \\(bu \n");                               break;
+		case PRE_IP_DASH:   PRINT_OUTPUT("\n.IP - \n");                                   break;
 	}
 }
 
 void do_surround(char *text, MSTag type) {
 	switch (type) {
-		case SUR_BI: fprintf(args.output, "\\fB\\fI%s\\fR", strip_surround(text, 3)); break;
-		case SUR_B: fprintf(args.output, "\\fB%s\\fR", strip_surround(text, 2)); break;
-		case SUR_I: fprintf(args.output, "\\fI%s\\fR", strip_surround(text, 1)); break;
-		case SUR_M: fprintf(args.output, "\\fC%s\\fR", strip_surround(text, 1)); break;
+		case SUR_BI: PRINT_OUTPUT("\\fB\\fI%s\\fR", strip_surround(text, 3)); break;
+		case SUR_B:  PRINT_OUTPUT("\\fB%s\\fR", strip_surround(text, 2));     break;
+		case SUR_I:  PRINT_OUTPUT("\\fI%s\\fR", strip_surround(text, 1));     break;
+		case SUR_M:  PRINT_OUTPUT("\\fC%s\\fR", strip_surround(text, 1));     break;
 	}
 }
 
 void surround_multiline(const char *fmt, char *text, int count) {
     for (int i = count; i < strlen(text) - count; i++) {
         if (text[i] == '\n') {
-            fprintf(args.output, fmt, strip_surround(&text[i+1], count));
+            PRINT_OUTPUT(fmt, strip_surround(&text[i+1], count));
         }
     }
 }
@@ -163,13 +162,13 @@ int parse_args(int argc, char **argv) {
 	int opt;
 	while ((opt = getopt(argc, argv, "a:bno:pt:T")) != -1) {
 		switch (opt) {
-			case 'b': args.flags |= FLAG_BREAK_FRONT_PAGE; break;
-			case 'n': args.flags |= FLAG_NO_DATE_DISPLAY; break;
-            case 'T': args.flags |= FLAG_FIRST_HEADER_TITLE; break;
+			case 'b': args.flags |= FLAG_BREAK_FRONT_PAGE;        break;
+			case 'n': args.flags |= FLAG_NO_DATE_DISPLAY;         break;
+            case 'T': args.flags |= FLAG_FIRST_HEADER_TITLE;      break;
 			case 'o': args.output = open_file(argv[optind], "w"); break;
-			case 't': args.title = optarg; break;
-			case 'a': args.author = optarg; break;
-			default: usage(argv[0]); return 0;
+			case 't': args.title = optarg;                        break;
+			case 'a': args.author = optarg;                       break;
+			default: usage(argv[0]);                              return 0;
 		}
 	}
 
@@ -180,18 +179,18 @@ int parse_args(int argc, char **argv) {
 }
 
 void print_head() {
-	fprintf(args.output, ".fp 8 CW\n");
+		PRINT_OUTPUT(".fp 8 CW\n");
 	if (args.flags & FLAG_BREAK_FRONT_PAGE) {
-		fprintf(args.output, ".RP no\n");
+		PRINT_OUTPUT(".RP no\n");
 	}
 	if (args.flags & FLAG_NO_DATE_DISPLAY) {
-		fprintf(args.output, ".ND \"\"\n");
+		PRINT_OUTPUT(".ND \"\"\n");
 	}
 	if (args.title) {
-		fprintf(args.output, ".TL \n%s\n", args.title);
+		PRINT_OUTPUT(".TL \n%s\n", args.title);
 	}
 	if (args.author) {
-		fprintf(args.output, ".AU\n%s\n", args.title);
+		PRINT_OUTPUT(".AU\n%s\n", args.author);
 	}
 }
 
