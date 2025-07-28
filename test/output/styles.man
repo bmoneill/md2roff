@@ -1,0 +1,13 @@
+
+.TH Text Styles
+
+
+\fIItalicized text\fP
+
+\fBBold text\fP
+
+\fBBold and italic text\fP
+
+\fBBold text\fP
+
+\fBMonospace text\fP

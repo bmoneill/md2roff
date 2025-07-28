@@ -47,6 +47,9 @@ install: md2ms md2man md2roff
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/md2ms.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/md2man.1
 
+test: md2ms md2man
+	MD2MAN=$(shell pwd)/md2man MD2MS=$(shell pwd)/md2ms ./test/test.sh
+
 uninstall:
 	rm -f $(PREFIX)/bin/md2roff $(PREFIX)/bin/md2ms $(PREFIX)/bin/md2man \
 		  $(MANPREFIX)/man1/md2roff.1 $(MANPREFIX)/man1/md2ms.1 \
