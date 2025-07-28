@@ -2,7 +2,15 @@ include config.mk
 
 TARGS = md2ms md2man md2roff
 MAN = doc/md2ms.1 doc/md2man.1 doc/md2roff.1
-SRC = src/md2ms.l src/md2man.l src/md2roff.c src/util.c src/util.h
+
+MD2MS_SRC = src/md2ms.l src/util.c
+MD2MS_OBJ = src/util.o
+
+MD2MAN_SRC = src/md2man.l src/util.c
+MD2MAN_OBJ = src/util.o
+
+MD2ROFF_SRC = src/md2roff.c
+MD2ROFF_OBJ = src/md2roff.o
 
 all: $(TARGS)
 
@@ -10,18 +18,18 @@ gen-examples: all
 	$(shell sed "/\.svg/d" README.md | ./md2man > examples/README.1)
 	$(shell sed "/\.svg/d" README.md | ./md2ms -nT | groff -ms -Tpdf > examples/README.pdf)
 
-md2roff:
+md2roff: src/md2roff.c
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c
 
-md2ms: src/util.o
+md2ms: $(MD2MS_OBJ) src/md2ms.l
 	$(LEX) -o src/$@_lex.yy.c src/$@.l
 	$(CC) $(CFLAGS) -o src/$@_lex.yy.o -c src/$@_lex.yy.c
-	$(CC) $(LDFLAGS) $(LIBS) -o $@ src/$@_lex.yy.o $^
+	$(CC) $(LDFLAGS) $(LIBS) -o $@ src/$@_lex.yy.o src/util.o
 
-md2man: src/util.o
+md2man: $(MD2MAN_OBJ) src/md2man.l
 	$(LEX) -o src/$@_lex.yy.c src/$@.l
 	$(CC) $(CFLAGS) -o src/$@_lex.yy.o -c src/$@_lex.yy.c
-	$(CC) $(LDFLAGS) $(LIBS) -o $@ src/$@_lex.yy.o $^
+	$(CC) $(LDFLAGS) $(LIBS) -o $@ src/$@_lex.yy.o src/util.o
 
 src/util.o: src/util.c
 	$(CC) $(CFLAGS) -o $@ -c $^
@@ -29,7 +37,7 @@ src/util.o: src/util.c
 clean:
 	rm -f md2ms md2man md2roff src/*lex.yy.o src/*lex.yy.c src/util.o md2
 
-dist: clean
+dist:
 	mkdir -p dist
 	cp -r doc/ dist/doc
 	cp -r src/ dist/src
