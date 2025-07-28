@@ -17,7 +17,8 @@ typedef enum {
 	PRE_SH3,
 	PRE_SH4,
 	PRE_SH5,
-	PRE_IP,
+	PRE_IP_BULLET,
+	PRE_IP_DASH,
 	SUR_BI,
 	SUR_B,
 	SUR_I,
@@ -80,8 +81,8 @@ SPACE [ \t]+
 "### "{STRING}+"\n" { do_pre(yytext, PRE_SH3); }
 "#### "{STRING}+"\n" { do_pre(yytext, PRE_SH4); }
 "##### "{STRING}+"\n" { do_pre(yytext, PRE_SH5); }
-"\n* " { do_pre(yytext, PRE_IP); }
-"\n- " { do_pre(yytext, PRE_IP); }
+"\n* " { do_pre(yytext, PRE_IP_BULLET); }
+"\n- " { do_pre(yytext, PRE_IP_DASH); }
 "***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
 "**"{STRING}+"**" { do_surround(yytext, SUR_B); }
 "*"{STRING}+"*" { do_surround(yytext, SUR_I); }
@@ -136,7 +137,8 @@ void do_pre(char *text, MSTag type) {
 		case PRE_SH3: fprintf(args.output, "\n.NH 3\n%s\n.PP", strip_whitespace(&text[4])); break;
 		case PRE_SH4: fprintf(args.output, "\n.NH 4\n%s\n.PP", strip_whitespace(&text[5])); break;
 		case PRE_SH5: fprintf(args.output, "\n.NH 5\n%s\n.PP", strip_whitespace(&text[6])); break;
-		case PRE_IP:  fprintf(args.output, "\n.IP - \n"); break;
+		case PRE_IP_BULLET: fprintf(args.output, "\n.IP \\(bu \n"); break;
+		case PRE_IP_DASH: fprintf(args.output, "\n.IP - \n"); break;
 	}
 }
 

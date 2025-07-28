@@ -3,7 +3,7 @@
 
 
 
-.SH List 1
+.SH Bullet list
 
 
 .TP
@@ -14,7 +14,7 @@ List item 2
 List item 3
 
 
-.SH List 2
+.SH Dash list
 
 
 .TP

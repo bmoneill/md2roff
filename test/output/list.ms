@@ -6,19 +6,19 @@ Lists
 .PP
 
 .NH 2
-List 1
+Bullet list
 
 .PP
-.IP - 
+.IP \(bu 
 List item 1
-.IP - 
+.IP \(bu 
 List item 2
-.IP - 
+.IP \(bu 
 List item 3
 .PP
 
 .NH 2
-List 2
+Dash list
 
 .PP
 .IP - 
