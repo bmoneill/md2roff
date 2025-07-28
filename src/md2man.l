@@ -15,7 +15,6 @@ typedef enum {
 	SUR_BI,
 	SUR_B,
 	SUR_I,
-	SUR_UL,
 	SUR_M
 } ManTag;
 
@@ -74,7 +73,7 @@ STRING [a-zA-Z0-9!@#$%^&\:(),.?/\\\-<>|\{\}\[\]\"\'* \t]
 "***"{STRING}+"***" { do_surround(yytext, SUR_BI); }
 "**"{STRING}+"**" { do_surround(yytext, SUR_B); }
 "*"{STRING}+"*" { do_surround(yytext, SUR_I); }
-"__"{STRING}+"__" { do_surround(yytext, SUR_UL); }
+"__"{STRING}+"__" { do_surround(yytext, SUR_B); }
 "`"{STRING}+"`" { do_surround(yytext, SUR_M); }
 "." { fprintf(args.output, "\\."); }
 %%
@@ -102,7 +101,6 @@ void do_surround(char *text, ManTag type) {
 		case SUR_BI: fprintf(args.output, "\\fB%s\\fP", strip_surround(text, 3)); break;
 		case SUR_B: fprintf(args.output, "\\fB%s\\fP", strip_surround(text, 2)); break;
 		case SUR_I: fprintf(args.output, "\\fI%s\\fP", strip_surround(text, 1)); break;
-		case SUR_UL: fprintf(args.output, "\\fI%s\\fP", strip_surround(text, 2)); break;
 		case SUR_M: fprintf(args.output, "\\fB%s\\fP", strip_surround(text, 1)); break;
 	}
 }
