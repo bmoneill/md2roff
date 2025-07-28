@@ -19,7 +19,7 @@ jobs:
       run: make dist
     - name: Set environment variables
       run: |
-        echo "MD2MS=$(pwd)/md2ms" >> $GITHUB_ENV
-        echo "MD2MAN=$(pwd)/md2man" >> $GITHUB_ENV
+        echo "MD2MS=$(pwd)/../md2ms" >> $GITHUB_ENV
+        echo "MD2MAN=$(pwd)/../md2man" >> $GITHUB_ENV
     - name: test
-      run: ./test/test.sh MD2MS=$(pwd)/md2ms MD2MAN=$(pwd)/md2man
+      run: ./test/test.sh
