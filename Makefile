@@ -7,8 +7,8 @@ SRC = src/md2ms.l src/md2man.l src/md2roff.c src/util.c src/util.h
 all: $(TARGS)
 
 gen-examples: all
-	$(shell ./md2man < README.md > examples/README.1)
-	$(shell ./md2ms -nT README.md | groff -ms -Tpdf > examples/README.pdf)
+	$(shell sed "/\.svg/d" README.md | ./md2man > examples/README.1)
+	$(shell sed "/\.svg/d" README.md | ./md2ms -nT | groff -ms -Tpdf > examples/README.pdf)
 
 md2roff:
 	$(CC) $(LDFLAGS) -o md2roff src/md2roff.c

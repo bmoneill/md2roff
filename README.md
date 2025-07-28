@@ -1,5 +1,7 @@
 # md2roff
 
+![Build and test](https://github.com/bmoneill/md2roff/actions/workflows/build-test.yml/badge.svg)
+
 `md2roff` converts Markdown to roff source (ms or man formats). This is useful
 for converting Markdown files to printable PDFs or generating a manpage from
 a Markdown file.
