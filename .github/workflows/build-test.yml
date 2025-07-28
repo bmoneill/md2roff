@@ -1,0 +1,21 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main", "testing" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: make
+      run: make
+    - name: make dist
+      run: make dist
+    - name: test
+      run: ./test/test.sh MD2MS=$(pwd)/md2ms MD2MAN=$(pwd)/md2man
