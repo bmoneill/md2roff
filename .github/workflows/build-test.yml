@@ -15,11 +15,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: make
       run: make
-    - name: make dist
-      run: make dist
     - name: Set environment variables
       run: |
-        echo "MD2MS=$(pwd)/../md2ms" >> $GITHUB_ENV
-        echo "MD2MAN=$(pwd)/../md2man" >> $GITHUB_ENV
+        echo "MD2MS=$(pwd)/md2ms" >> $GITHUB_ENV
+        echo "MD2MAN=$(pwd)/md2man" >> $GITHUB_ENV
     - name: test
       run: ./test/test.sh
