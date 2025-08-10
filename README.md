@@ -12,6 +12,8 @@ a Markdown file.
 
 ## Building
 
+### Linux
+
 ```shell
 make
 sudo make install
